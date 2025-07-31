@@ -1,0 +1,283 @@
+<?php
+// error_reporting(0);
+require_once('database_con/connect.php');
+$success = false;
+$error = false;
+$errormassage = "";
+$successmassage = "";
+if (!$conn) {
+  echo "<!DOCTYPE HTML><html><head><link rel='icon' type='image/png' sizes='32x32' href='../images/favicon.ico'/><title>500 Not Found</title></head><body><br>";
+  echo "<span style='color:rgba(255,0,0,1);'><b>Oops, something went wrong.</b></span><br><b>500.</b> <span style='color:rgba(0,0,0,0.5);'> That's an internal server error. </span><br><br><br><i>Sorry..!. We cannot proced for internal server error..!.</i><br><span style='color:rgba(255,105,180,1);'>Try to refresh this page or feel free to contact if the problem persists.</span><br>";
+  die("<span style='color:rgba(0,0,0,0.5);'> We failed to connect: " . mysqli_connect_error() . " .</span><hr></body></html>");
+} else {
+  if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      if (isset($_POST['mobile_number']) and isset($_POST['password']) and isset($_POST["refarens_id"])) {
+
+          // get the data
+          $refarensid =  mysqli_real_escape_string($conn, $_POST["refarens_id"]);
+          $doctorname =  mysqli_real_escape_string($conn, $_POST["doctor_name"]);
+          $mobilenumber =  mysqli_real_escape_string($conn, $_POST["mobile_number"]);
+          $specialisation =  mysqli_real_escape_string($conn, $_POST["specialisation"]);
+          $password =  mysqli_real_escape_string($conn, $_POST["password"]);
+          $confirmpassword =  mysqli_real_escape_string($conn, $_POST["confirm_password"]);
+
+
+          if ($refarensid != "" and $doctorname != "" and $mobilenumber != "" and $specialisation != "" and $password != "" and $confirmpassword != "") {
+              # code...
+              $regvalidate = validCheck($refarensid, $doctorname, $mobilenumber, $specialisation, $password, $confirmpassword);
+              if ($regvalidate == false) {
+                  # code...
+                  $sandDeta = storedata($refarensid, $doctorname, $mobilenumber, $specialisation, $password, $confirmpassword, $conn);
+              }
+          } else {
+              # code...
+              $error = true;
+              $errormassage = "Fillup all the input field..!";
+          }
+      }
+  }
+}
+
+
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+  if (isset($_GET['errorcode'])) {
+      $logerror = 0;
+      $logerror = $_GET['errorcode'];
+      if ($logerror == 1) {
+          # code...
+          $error = true;
+          $errormassage = "Sorry We cannot Proced for internal server error..!";
+      } elseif ($logerror == 2) {
+          # code...
+          $error = true;
+          $errormassage = "Fillup all the input field..!";
+      } elseif ($logerror == 3) {
+          # code...
+          $error = true;
+          $errormassage = "Your mobile number not found, Please register first";
+      } elseif ($logerror == 4) {
+          # code...
+          $error = true;
+          $errormassage = "Invalid Credentials";
+      }
+  }
+}
+
+
+function storedata($refarensid, $doctorname, $mobilenumber, $specialisation, $password, $confirmpassword, $conn)
+{
+  // Check whether this username exists
+
+  global $errormassage, $error, $successmassage, $success;
+  $filtername = htmlspecialchars($doctorname);
+  $filternumber = htmlspecialchars($mobilenumber);
+  $filterspecialisation = htmlspecialchars($specialisation);
+  $existSql = "SELECT * FROM `db_doctor_account_reg` WHERE mobilenumber = '$filternumber'";
+  $exiresult = mysqli_query($conn, $existSql);
+  $numExistRows = mysqli_num_rows($exiresult);
+  if ($numExistRows > 0) {
+      $error = true;
+      $errormassage = "Your mobile number already exist in our system...";
+      return $error;
+  } else {
+      if (filter_var($filternumber, FILTER_VALIDATE_INT)) {
+          if (($password == $confirmpassword)) {
+              do {
+                  $dup_check = 0;
+                  $refarensid = rand(10000, 99999);
+                  while ($row = mysqli_fetch_assoc($exiresult)) {
+                      if ($row['refarensid'] == $refarensid) {
+                          # code...
+                          $dup_check = 1;
+                          break;
+                      } else {
+                          # code...
+                          $dup_check = 0;
+                      }
+                  }
+              } while ($dup_check == 1);
+
+              $hashpass = password_hash($password, PASSWORD_DEFAULT);
+              // Sql query to be executed
+              $sql = "INSERT INTO `db_doctor_account_reg` ( `refarensid`, `doctorname`, `mobilenumber`, `specialisation`, `password`, `time`) VALUES ('$refarensid', '$filtername', '$filternumber', '$filterspecialisation', '$hashpass', current_timestamp())";
+              $result = mysqli_query($conn, $sql);
+              if ($result) {
+                  $success = true;
+                  $error = false;
+                  $successmassage = "Your Information submitted successfully.";
+                  return $error;
+              } else {
+                  $error = true;
+                  $errormassage = "Sorry we have facing some technical issues.";
+                  return $error;
+              }
+          } else {
+              $error = true;
+              $errormassage = "Your Password doesn't match.";
+              return $error;
+          }
+      } else {
+          $error = true;
+          $errormassage = "Enter a valid mobile number!.";
+          return $error;
+      }
+  }
+}
+
+function validCheck($refarensid, $doctorname, $mobilenumber, $specialisation, $password, $confirmpassword)
+{
+
+  global $errormassage, $error, $successmassage, $success;
+  //check the data is valid or not
+if ($refarensid == "" or strlen($refarensid) < 5 or strlen($refarensid) > 7) {
+  # code...
+  $error = true;
+  if (strlen($refarensid) < 5) {
+      $errormassage = "Incorrect, Enter your correct refarensid";
+  } elseif (strlen($refarensid) > 7) {
+      $errormassage = "Incorrect, Enter your correct refarensid";
+  } else {
+      $errormassage = "Incorrect, Enter your refarensid";
+  }
+  return $error;
+} elseif ($doctorname == "" or preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $doctorname)) {
+      # code...
+      $error = true;
+      if (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $doctorname)) {
+          $errormassage = "Incorrect, Name only contain character";
+      } else {
+          $errormassage = "Incorrect, Enter your full name";
+      }
+      return $error;
+  } elseif ($mobilenumber == "" or strlen($mobilenumber) < 9 or strlen($mobilenumber) > 11) {
+      # code...
+      $error = true;
+      if (strlen($mobilenumber) < 9) {
+          $errormassage = "Incorrect, Enter your correct number";
+      } elseif (strlen($mobilenumber) > 11) {
+          $errormassage = "Incorrect, Enter your correct number";
+      } else {
+          $errormassage = "Incorrect, Enter your number";
+      }
+      return $error;
+  } elseif ($specialisation == "") {
+      $error = true;
+      $errormassage = "Incorrect, Please Enter your specialisation";
+  } elseif ($password != "") {
+      # code...
+
+      if ($password <= '7') {
+          $error = true;
+          $errormassage = "Incorrect, Your Password Must Contain At Least 8 Digits !";
+      } elseif (!preg_match("#[0-9]+#", $password)) {
+          $error = true;
+          $errormassage = "Incorrect, Your Password Must Contain At Least 1 Number !";
+      } elseif (!preg_match("#[A-Z]+#", $password)) {
+          $error = true;
+          $errormassage = "Incorrect, Your Password Must Contain At Least 1 Capital Letter !";
+      } elseif (!preg_match("#[a-z]+#", $password)) {
+          $error = true;
+          $errormassage = "Incorrect, Your Password Must Contain At Least 1 Lowercase Letter !";
+      } elseif (!preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $password)) {
+          $error = true;
+          $errormassage = "Incorrect, Your Password Must Contain At Least 1 Special Character !";
+      }
+      return $error;
+  } elseif ($confirmpassword == "" or $password == $confirmpassword) {
+      # code...
+      $error = true;
+      $errormassage = "Incorrect, Retype Password not match";
+  } else {
+      $error = false;
+  }
+  return $error;
+}
+?>
+<Html>
+    <head>
+        <link href="Signup_Pascent.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="title-text">
+              <div class="title login">Login Form</div>
+              <div class="title signup">Signup Form</div>
+            </div>
+            <div class="form-container">
+              <div class="slide-controls">
+                <input type="radio" name="slide" id="login" checked>
+                <input type="radio" name="slide" id="signup">
+                <label for="login" class="slide login">Login</label>
+                <label for="signup" class="slide signup">Signup</label>
+                <div class="slider-tab"></div>
+              </div>
+              <div class="form-inner">
+                <form action="login_check_Paticnt.php" class="login" method="post">
+                  <div class="field">
+                    <input type="text" placeholder="Mobile Number" required name="log-mob-number">
+                  </div>
+                  <div class="field">
+                    <input type="password" placeholder="Password" required name="log-password">
+                  </div>
+                  <div class="pass-link"><a href="#">Forgot password?</a></div>
+                  <div class="field btn">
+                    <div class="btn-layer"></div>
+                    <input type="submit" value="Login">
+                  </div>
+                  <div class="signup-link">Not a member? <a href="">Signup now</a></div>
+                </form>
+                <form action="Signup_Paticent.php" class="signup" method="post">
+                  <div class="field">
+                    <input type="number" placeholder="Reference id" required name="refarens_id">
+                  </div>
+                  <div class="field">
+                    <input type="text" placeholder="Paticent Name" required name="doctor_name">
+                  </div>
+                  <div class="field">
+                    <input type="text" placeholder="Mobile Number" required name="mobile_number">
+                  </div>
+                  
+                  <div class="field">
+                    <input type="password" placeholder="Password" required name="password">
+                  </div>
+                  <div class="field">
+                    <input type="password" placeholder="Confirm password" required name="confirm_password">
+                  </div>
+                  <div class="field btn">
+                    <div class="btn-layer"></div>
+                    <input type="submit" value="Signup">
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <?php
+        if ($error) { ?>
+            <div class="contener contenerblock" id="contenerfphp">
+                <div class="form-popup" id="myForm">
+                    <form action="#" class="form-container">
+                        <h1>MsgBox</h1>
+                        <b id="output" style="color:red"><?php echo ($errormassage); ?></b>
+                        <button type="button" class="btn cancel" onclick="javascript:document.getElementById('contenerfphp').style.display = 'none';">Close</button>
+                    </form>
+                </div>
+            </div>
+        <?php
+        }
+        if ($success) { ?>
+            <div class="contener contenerblock" id="contenerfphp">
+                <div class="form-popup" id="myForm">
+                    <form action="#" class="form-container">
+                        <h1>MsgBox</h1>
+                        <b id="output" style="color:green"><?php echo ($successmassage); ?></b>
+                        <button type="button" class="btn cancel" onclick="javascript:document.getElementById('contenerfphp').style.display = 'none';">Close</button>
+                    </form>
+                </div>
+            </div>
+        <?php
+        }
+        ?>
+ <script src="js/singup_pacent.js"></script>
+    </body>
+</Html>    

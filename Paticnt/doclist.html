@@ -1,0 +1,193 @@
+<html>
+<head>
+	<link href="assets/img/eemm.png" rel="icon">
+<link rel="stylesheet" type="text/css" href="home.css">
+<link rel="stylesheet" href="loader.css">   
+	<link rel="shortcut icon" type="image/x-icon" href="eemm.jpg" />
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <title>Doctors Details</title>
+<style>
+   body
+	   {
+	   width:500px;
+       height:1000px;
+       background:rgb(123, 164, 226);
+	   background-image:url("assets/img/cars1.jpg");
+	    background-repeat:no-repeat;
+		background-position: justify;
+		background-size: cover;
+		background-blend-mode:soft-light;
+    }
+	 .content-table{
+		border-collapse:collapse;
+		margin:25px 0;
+		font-size:0.9em;
+		min-width:700px;
+		border-radius:5px 5px 0px 0px;
+		overflow:hidden;
+		box-shadow: 0 0 20px rgba(0,0,0,0.25);
+		text-align:center;
+	}
+	.content-table thead tr {
+		background-color:#a1c9ce;
+		color:rgb(59, 6, 119);
+		text-align:center;
+		font-weight:bold ;
+	}
+	.content-table th,content-table tr{
+		padding:25px 60px;
+	}
+	.content-table tbody tr{
+		border-bottom:1px solid #dddddd;
+	}
+	.content-table tbody tr:nth-of-type(even){
+		background-color:#f3f3f3;
+	}
+	.content-table tbody tr:last-of-type{
+		border-bottom:2px solid #d12096;
+	
+	}
+	.link{
+		
+	}
+	.search-box{
+		position:var(#00986f);
+		top:70px;
+		left:500px;
+		transfrom:translate(-50%,-50%);
+		background:#edf5ef;
+		height:40px;
+		border-radius:40px;
+	}
+	.search-box:hover > .search-btn{
+		background:#6be6cd;
+	}
+	.search-btn{
+		color:rgb(63, 39, 202);
+		float:center;
+		width:70px;
+		height:40px;
+		border:none;
+		border-radius:40px;
+		background:#e44bca;
+		display:flex;
+		justify-content:center;
+		align-items:center;
+		transition:0.4s;
+	}
+	.search-box:hover > .search-txt{
+		width:250px;
+		padding:0 6px;
+	}
+	
+	.search-txt{
+		border: 1px;;
+		background:none;
+		outline:none;
+		float:left;
+		padding:0;
+		color:rgb(43, 25, 25);
+		font-size:20px;
+		font-family:sans-serif;
+		transition:0.4s;
+		line-height:30px;
+		width:0px;
+	}
+	
+        </style>   
+   </head>
+<body>
+<div class="loader">
+	  <img src="gif/loader.gif" alt="" />
+	</div>
+	<script src="load.js">
+	</script>
+    <div class="link">
+        <a class="float-right" href="index.html" style="font-size:20px;color:white;text-decoration:none;font-family:sofia;"><h4><i class="fa fa-backward" aria-hidden="true"> Back</i> </h4></a>
+    </div>  
+	
+	<h1 style="color:#110863">
+	
+		DOCTORS CAN SEE THE BOOKING DATE HERE </h1><br>
+    
+	<form action="" method="POST" autocomplete="off"> 
+        <div class="search-box">
+            <input class="search-txt" type="text" name="valueToSearch" placeholder="Value To Search">
+            <input class="search-btn" type="submit"  name="search" value="SEARCH">
+        </div> 
+    </form>		
+   <table class="content-table" aria-label="center">
+        <thead>
+        <tr>  
+        <th>DOCTOR's ID</th>     
+        <th>DOCTOR's NAME</th> 
+        <th>SPECIALIZATION</th> 		  
+        <th>PAID FEES</th> 
+		<th>BOOKING DATE</th> 
+		 
+        </tr>
+		<tr>
+			<td>101ad</td>
+			<td>Dr.Souvick Dhara</td>
+			<td>General Physician</td>
+			<td>500 RS</td>
+			<td>26/08/2022</td>
+			
+		</tr>
+		<tr>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>22/08/2022</td>
+			
+		</tr>
+		<tr>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>20/08/2022</td>
+			
+		</tr>
+		<tr>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>18/08/2022</td>
+			
+		</tr>
+		<tr>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>15/08/2022</td>
+			
+		</tr>
+		<tr>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>---</td>
+			<td>30/08/2022</td>
+			
+		</tr>
+        </thead>
+		
+ <!-- populate table from mysql database -->
+              
+        <tr>
+        <td><?php echo $row['docid'] ?></td>
+        <td><?php echo $row['docname'] ?></td>
+        <td><?php echo $row['specilaization'] ?></td>
+        <td><?php echo $row['consultancyfees'] ?></td>
+        </tr>
+		
+		
+        </table>
+		
+        
+    </body>
+</html>
